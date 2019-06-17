@@ -86,6 +86,16 @@ class FromFileDictionary:
         return choice(self.__dict)
 
 
+ITALIC = '3'
+RED = '31'
+GREEN = '32'
+WHITE = '97'
+
+
+def ansi_format(text, *formats):
+    return '\033[{0}m{1}\033[0m'.format(';'.join(formats), text)
+
+
 class TerminalUI(object):
     def __init__(self):
         self.__indent = 0
@@ -107,17 +117,17 @@ class TerminalUI(object):
 
         prompt = word + "  →  "
         self.__indent = len(header) + len(prompt) - 3
-        return input(header + "\033[97m" + prompt + "\033[0m")
+        return input(header + ansi_format(prompt, WHITE))
 
     def tell_answer_was_wrong(self, accepted):
-        print(self.indent() + '\033[31m✗  \033[3m{0}\033[0m'.format(', '.join(accepted)))
+        print(self.indent() + ansi_format('✗  ', RED) + ansi_format(', '.join(accepted), RED, ITALIC))
 
     def tell_answer_was_correct(self, accepted):
-        print(self.indent() + '\033[32m✓  \033[3m{0}\033[0m'.format(', '.join(accepted)))
+        print(self.indent() + ansi_format('✓  ', GREEN) + ansi_format(', '.join(accepted), GREEN, ITALIC))
 
     def summarize(self, score, max_score):
         print("\n----------")
-        print("\033[97m Σ {0:.1f}%\033[0m".format(score / max_score * 100.0))
+        print(ansi_format(" Σ {0:.1f}%".format(score / max_score * 100.0), WHITE))
 
 
 class Application:
