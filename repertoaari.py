@@ -115,9 +115,9 @@ class TerminalUI(object):
         else:
             header = "---  "
 
-        prompt = word + "  →  "
+        prompt = "→  "
         self.__indent = len(header) + len(prompt) - 3
-        return input(header + ansi_format(prompt, WHITE))
+        return input(header + ansi_format(word, WHITE) + "\n" + self.indent() + ansi_format(prompt, WHITE))
 
     def tell_answer_was_wrong(self, accepted):
         print(self.indent() + ansi_format('✗  ', RED) + ansi_format(', '.join(accepted), RED, ITALIC))
