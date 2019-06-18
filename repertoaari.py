@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import re
 from random import choice
 
 
@@ -41,18 +42,44 @@ class Repertoaari:
         self.__ui.summarize(score, max_score)
 
     def score_answer(self, translation, actual):
-        if actual.strip().lower() in translation.accepted:
-            self.__ui.tell_answer_was_correct(translation.accepted)
-            return 1.0
-        else:
-            self.__ui.tell_answer_was_wrong(translation.accepted)
-            return 0.0
+        for acceptable in translation.accepted:
+            if acceptable.match(actual):
+                self.__ui.tell_answer_was_correct(translation.accepted)
+                return 1.0
+
+        self.__ui.tell_answer_was_wrong(translation.accepted)
+        return 0.0
 
 
 class Translation(object):
     def __init__(self, word, accepted_translations):
         self.word = word
         self.accepted = accepted_translations
+
+
+class WordMatcher:
+    def __init__(self, text):
+        self.__text = text
+        text = re.sub(r"\([^\)]*\)", r"", text).strip()
+        text = re.sub(r"\] ", " ]", text)
+        text = re.sub(r" \[", "[ ", text)
+        text = re.sub(r"\[([^\]]*)\]", r"(\1)?", text)
+        self.__expected = re.compile(text.lower())
+
+    def __str__(self):
+        return self.__text
+
+    def __repr__(self):
+        return str(self)
+
+    def __eq__(self, text):
+        return self.__expected.match(text.strip().lower()) is not None
+
+    def __ne__(self, text):
+        return not self.__eq__(text)
+
+    def match(self, text):
+        return self.__eq__(text)
 
 
 class FromFileDictionary:
@@ -80,7 +107,10 @@ class FromFileDictionary:
                         raise SetUpFailed('err-dict-duplicated-entry', filename, elements[0])
 
                     self.__keys.add(elements[0])
-                    self.__dict.append(Translation(elements[0], [e.strip().lower() for e in elements[1].split(',')]))
+                    self.__dict.append(Translation(elements[0], self.__parse_entries(elements)))
+
+    def __parse_entries(self, elements):
+        return [WordMatcher(e) for e in elements[1].split(',')]
 
     def pick_random(self):
         return choice(self.__dict)
@@ -120,10 +150,10 @@ class TerminalUI(object):
         return input(header + ansi_format(word, WHITE) + "\n" + self.indent() + ansi_format(prompt, WHITE))
 
     def tell_answer_was_wrong(self, accepted):
-        print(self.indent() + ansi_format('✗  ', RED) + ansi_format(', '.join(accepted), RED, ITALIC))
+        print(self.indent() + ansi_format('✗  ', RED) + ansi_format(', '.join([str(s) for s in accepted]), RED, ITALIC))
 
     def tell_answer_was_correct(self, accepted):
-        print(self.indent() + ansi_format('✓  ', GREEN) + ansi_format(', '.join(accepted), GREEN, ITALIC))
+        print(self.indent() + ansi_format('✓  ', GREEN) + ansi_format(', '.join([str(s) for s in accepted]), GREEN, ITALIC))
 
     def summarize(self, score, max_score):
         print("\n----------")
