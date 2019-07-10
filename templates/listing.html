@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dictionary listing for: {{ dict_file }}</title>
+    <link rel="stylesheet" href="{{ stylesheet }}" type="text/css">
+</head>
+<body>
+    <div id="menu">Reperto<strong>aari</strong></div>
+    <div id="content">
+    <h1>Dictionary listing for: <em>{{ dict_file }}</em></h1>
+
+    <table>
+        <thead>
+            <tr><td>{{ head[0] }}</td><td>{{ head[1] }}</td></tr>
+        </thead>
+        <tbody>
+            {% for entry in entries %}
+            <tr><td>{{ entry[0] }}</td><td>{{ entry[1] }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</body>
+</html>

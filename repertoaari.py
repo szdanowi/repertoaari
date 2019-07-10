@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import os
 import re
 from random import choice
 
@@ -8,6 +9,11 @@ class SetUpFailed(Exception):
     def __init__(self, code, *args):
         self.code = code
         self.args = args
+
+
+class NoSuchDictionary(SetUpFailed):
+    def __init__(self, *args):
+        SetUpFailed(self, 'err-dict-no-such-file', *args)
 
 
 class Repertoaari:
@@ -35,11 +41,19 @@ class Repertoaari:
         max_score = questions_to_ask * 1.0
 
         for i in range(0, questions_to_ask):
+            actual = self.ask(i if not self.__shuffle else None)
             translation = self.__dictionary.pick_random() if self.__shuffle else self.__dictionary[i]
-            actual = self.__ui.ask_question(translation.word, (i+1, questions_to_ask))
+            self.__ui.ask_question(translation.word, (i+1, questions_to_ask))
             score += self.score_answer(translation, actual)
 
         self.__ui.summarize(score, max_score)
+
+    def ask(self, id):
+        if not id:
+            id = self.__dictionary.pick_random()
+
+        question = self.__dictionary[id]
+        self.__ui.ask_question(question.word)
 
     def score_answer(self, translation, actual):
         for acceptable in translation.accepted:
@@ -86,11 +100,13 @@ class FromFileDictionary:
     def __init__(self, filename):
         self.__dict = []
         self.__keys = set()
+        self.left = "Left"
+        self.right = "Right"
 
         try:
             self.__load_from(filename)
         except FileNotFoundError:
-            raise SetUpFailed('err-dict-no-such-file', filename)
+            raise NoSuchDictionary(filename)
 
     def __len__(self):
         return len(self.__keys)
@@ -100,20 +116,61 @@ class FromFileDictionary:
 
     def __load_from(self, filename):
         with open(filename, mode='rt', encoding='UTF-8') as f:
-            for line in f:
-                elements = [e.strip() for e in line.split(';')]
-                if len(elements) == 2:
-                    if elements[0] in self.__keys:
-                        raise SetUpFailed('err-dict-duplicated-entry', filename, elements[0])
+            lines = f.readlines()
+            self.left, self.right = self.__from_line(lines[0])
 
-                    self.__keys.add(elements[0])
-                    self.__dict.append(Translation(elements[0], self.__parse_entries(elements)))
+            for line in lines[1:]:
+                key, matchers = self.__from_line(line)
+                self.__add(key, matchers)
+
+    def __from_line(self, line):
+        elements = [e.strip() for e in re.sub('#.*$', '', line).split(';')]
+
+        if len(elements) != 2:
+            return None, None
+
+        return elements[0], elements[1]
+
+    def __add(self, key, matchers):
+        if not key or not matchers:
+            return
+
+        if key in self.__keys:
+            raise SetUpFailed('err-dict-duplicated-entry', key)
+
+        self.__keys.add(key)
+        self.__dict.append(Translation(key, self.__parse_entries(matchers)))
 
     def __parse_entries(self, elements):
-        return [WordMatcher(e) for e in elements[1].split(',')]
+        return [WordMatcher(e) for e in elements.split(',')]
 
     def pick_random(self):
         return choice(self.__dict)
+
+
+class CachedDictionaries(object):
+    def __init__(self):
+        self.__current = None
+        self.__all = dict()
+
+    def load(self, name):
+        if len(self.__all) > 10:
+            self.__all.clear()
+
+        if not name in self.__all:
+            self.__all[name] = FromFileDictionary(os.path.dirname(os.path.abspath(__file__)) + '/' + name)
+
+        self.__current = self.__all[name]
+        return self.__current
+
+    def __getattr__(self, name):
+        return self.__current.__getattr__(name)
+
+    def __getitem__(self, item):
+        return self.__current.__getitem__(item)
+
+    def __len__(self):
+        return self.__current.__len__()
 
 
 ITALIC = '3'

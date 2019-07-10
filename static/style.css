@@ -1,0 +1,79 @@
+body {
+  margin: 0em;
+  padding: 0em;
+
+  text-align: justify;
+  font-family: sans-serif;
+  font-weight: lighter;
+}
+
+div#menu {
+  padding: 1em;
+  margin: 0em 0em 3em 0em;
+  background-color: lightblue;
+  color: white;
+
+  font-size: 1em;
+  font-style: normal;
+  font-weight: 100;
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  text-transform: uppercase;
+}
+
+strong {
+  font-size: 1.5em;
+  font-weight: 400;
+  text-transform: lowercase;
+}
+
+div#content {
+  padding: 0em 2em 4em 2em;
+}
+
+h1 {
+  margin: 0em 0em 1.25em 0em;
+  font-size: 1.5em;
+  font-weight: lighter;
+}
+
+h1.error_title:after {
+  content: ":(";
+  float: right;
+  font-size: 2em;
+  margin: -0.2em 0.5em;
+}
+
+em {
+  font-style: normal;
+  font-weight: normal;
+}
+
+table {
+  margin: 0em;
+  padding: 0em;
+}
+
+td {
+  padding: 0.5em 1em 0.5em 1em;
+  margin: 1em;
+}
+
+table td {
+  white-space: nowrap
+}
+
+table td:last-child {
+  width: 100%;
+}
+
+table thead {
+  font-weight: normal;
+}
+
+table thead td {
+  background-color: #ebf6f9;
+}
+
+p {
+  line-height: 1.5em;
+}
