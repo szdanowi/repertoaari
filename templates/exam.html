@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Exam</title>
+    <link rel="stylesheet" href="{{ stylesheet }}" type="text/css">
+</head>
+<body>
+    <div id="menu">Reperto<strong>aari</strong></div>
+    <div id="content">
+    <h1>Exam</h1>
+
+    {% if points_awarded is defined %}
+        <p class="result">Your result is: {{ grade }} ({{ points_awarded }} of {{ max_points }} correct)</p>
+    {% endif %}
+
+    <form method="post"><table>
+        <thead>
+            <tr><td>{{ left_title }}</td><td>{{ right_title }}</td></tr>
+        </thead>
+        <tbody>
+            {% for entry in entries %}
+            <tr>
+                <td>
+                {% if entry.left_class is none %}
+                    {{ entry.left }}
+                {% else %}
+                    <input class="{{ entry.left_class }}" type="text" name="answer_{{ entry.pos }}_{{ entry.id }}_left" value="{{ entry.left }}">
+                    {% if entry.left_note is not none %}
+                        <p class="note">{{ entry.left_note }}</p>
+                    {% endif %}
+                {% endif %}
+                </td>
+                <td>
+                {% if entry.right_class is none %}
+                    {{ entry.right }}
+                {% else %}
+                    <input class="{{ entry.right_class }}" type="text" name="answer_{{ entry.pos }}_{{ entry.id }}_right" value="{{ entry.right }}">
+                    {% if entry.right_note is not none %}
+                        <p class="note">{{ entry.right_note }}</p>
+                    {% endif %}
+                {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            <tr><td colspan="2">
+                {% if points_awarded is not defined %}
+                    <input class="button" type="submit" value="Check your answers">
+                {% else %}
+                    <input class="button" type="submit" value="Resubmit your answers">
+                {% endif %}
+            </td></tr>
+        </tbody>
+    </table></form>
+    </div>
+</body>
+</html>

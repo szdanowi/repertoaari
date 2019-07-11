@@ -16,6 +16,11 @@ class NoSuchDictionary(SetUpFailed):
         SetUpFailed(self, 'err-dict-no-such-file', *args)
 
 
+class InvalidRequest(RuntimeError):
+    def __init__(self, what):
+        RuntimeError.__init__(self, what)
+
+
 class Repertoaari:
     def __init__(self, dictionary):
         self.__dictionary = dictionary
@@ -50,19 +55,83 @@ class Repertoaari:
 
     @staticmethod
     def score_answer(ui, translation, actual):
-        for acceptable in translation.accepted:
-            if acceptable.match(actual):
-                ui.tell_answer_was_correct(translation.accepted)
-                return 1.0
+        if translation.any_matches(actual):
+            ui.tell_answer_was_correct(translation.accepted())
+            return 1.0
 
-        ui.tell_answer_was_wrong(translation.accepted)
+        ui.tell_answer_was_wrong(translation.accepted())
         return 0.0
+
+    @staticmethod
+    def show_left_to_right_exam(ui, dictionary, words):
+        if not isinstance(words, int):
+            raise InvalidRequest("Number of requested words for quiz is not an integer")
+
+        if words < 1:
+            raise InvalidRequest("There need to be at least one word in an exam (requested {0} words)".format(words))
+
+        if words > 256:
+            raise InvalidRequest("We do not support more than 256 words in an exam (requested {0} words)".format(words))
+
+        ui.display_direction(dictionary.left, dictionary.right)
+        for question_id in [dictionary.pick_random_id() for i in range(0, words)]:
+            question = dictionary[question_id]
+            ui.ask_for(str(question_id), question.word, None)
+
+    class Answer:
+        def __init__(self, question_id, side, answer):
+            self.question_id = question_id
+            self.side = side
+            self.given = answer
+
+    @staticmethod
+    def assess_exam(ui, dictionary, answers):
+        submitted_answers = len(answers)
+
+        if submitted_answers < 1:
+            raise InvalidRequest("There need to be at least one word in an exam to assess (submitted {0} words)".format(submitted_answers))
+
+        if submitted_answers > 256:
+            raise InvalidRequest("We do not support more than 256 words in an exam to assess (submitted {0} words)".format(submitted_answers))
+
+        result = 0
+        ui.display_direction(dictionary.left, dictionary.right)
+        for answer in answers:
+            question = dictionary[int(answer.question_id)]
+
+            if answer.side == 'left':
+                question = question.reversed()
+
+            matches = question.any_matches(answer.given)
+            if matches:
+                result += 1
+
+            left_matched = None if answer.side == 'right' else matches
+            right_matched = None if answer.side == 'left' else matches
+            left_note = None if answer.side == 'right' else question.accepted()
+            right_note = None if answer.side == 'left' else question.accepted()
+
+            ui.show_assessment(answer.question_id, question.word, answer.given, left_matched, right_matched, left_note, right_note)
+
+        ui.display_summary(result, len(answers))
 
 
 class Translation(object):
     def __init__(self, word, accepted_translations):
         self.word = word
-        self.accepted = accepted_translations
+        self.__accepted = accepted_translations
+
+    def reversed(self):
+        return Translation(self.__accepted, self.word)
+
+    def any_matches(self, actual):
+        for acceptable in self.__accepted:
+            if acceptable.match(actual):
+                return True
+        return False
+
+    def accepted(self):
+        return ', '.join([str(s) for s in self.__accepted])
 
 
 class WordMatcher:
@@ -203,10 +272,10 @@ class TerminalUI(object):
         return input(header + ansi_format(word, WHITE) + "\n" + self.indent() + ansi_format(prompt, WHITE))
 
     def tell_answer_was_wrong(self, accepted):
-        print(self.indent() + ansi_format('✗  ', RED) + ansi_format(', '.join([str(s) for s in accepted]), RED, ITALIC))
+        print(self.indent() + ansi_format('✗  ', RED) + ansi_format(accepted, RED, ITALIC))
 
     def tell_answer_was_correct(self, accepted):
-        print(self.indent() + ansi_format('✓  ', GREEN) + ansi_format(', '.join([str(s) for s in accepted]), GREEN, ITALIC))
+        print(self.indent() + ansi_format('✓  ', GREEN) + ansi_format(accepted, GREEN, ITALIC))
 
     def summarize(self, score, max_score):
         print("\n----------")

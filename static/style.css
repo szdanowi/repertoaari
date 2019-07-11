@@ -27,11 +27,13 @@ strong {
 }
 
 div#content {
+  margin: auto;
+  max-width: 64em;
   padding: 0em 2em 4em 2em;
 }
 
 h1 {
-  margin: 0em 0em 1.25em 0em;
+  margin: 0em 0em 1.25em 0.2em;
   font-size: 1.5em;
   font-weight: lighter;
 }
@@ -51,19 +53,16 @@ em {
 table {
   margin: 0em;
   padding: 0em;
+  width: 100%;
+  table-layout: fixed;
 }
 
 td {
   padding: 0.5em 1em 0.5em 1em;
   margin: 1em;
-}
-
-table td {
-  white-space: nowrap
-}
-
-table td:last-child {
-  width: 100%;
+  table-layout: fixed;
+  text-align: center;
+  vertical-align: baseline;
 }
 
 table thead {
@@ -74,6 +73,67 @@ table thead td {
   background-color: #ebf6f9;
 }
 
+table tfoot td {
+  text-align: right;
+}
+
+input.answer, input.wrong, input.correct {
+  width: 100%;
+  border: 0px;
+  border-bottom: solid 1px;
+  margin: 0em;
+  padding: 0.25em;
+  box-sizing: border-box;
+
+  color: #1e5162;
+  font-weight: lighter;
+  font-size: 1em;
+  text-align: center;
+}
+
+input.correct, input.wrong {
+  width: 60%;
+  float: left;
+}
+
+input.correct {
+  background: #b3ffb3;
+}
+
+input.wrong {
+  background: #ffb3b3;
+}
+
+input.button {
+  width: 100%;
+  border: 0px;
+  background: #1e5162;
+  margin: 1.5em 0em;
+  padding: 0.5em;
+  box-sizing: border-box;
+
+  color: white;
+  font-weight: lighter;
+  font-size: 1em;
+}
+
 p {
   line-height: 1.5em;
+}
+
+p.note {
+  line-height: revert;
+  margin: 0.5em;
+  color: #1e5162;
+  font-size: 0.9em;
+}
+
+p.result {
+  width: 100%;
+  text-align: center;
+  margin: 1em 0em;
+  padding: 1em 0em;
+  font-size: 2em;
+  color: white;
+  background-color: lightblue;
 }
