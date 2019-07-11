@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import argparse
 import os
+import random
 import re
-from random import choice
 
 
 class SetUpFailed(Exception):
@@ -17,8 +17,7 @@ class NoSuchDictionary(SetUpFailed):
 
 
 class Repertoaari:
-    def __init__(self, ui, dictionary):
-        self.__ui = ui
+    def __init__(self, dictionary):
         self.__dictionary = dictionary
         self.__number_of_questions = 1
         self.__shuffle = True
@@ -34,34 +33,29 @@ class Repertoaari:
         self.__shuffle = is_enabled
         return self
 
-    def run(self):
+    def run(self, ui):
         questions_to_ask = self.__number_of_questions if self.__number_of_questions != 0 else len(self.__dictionary)
 
         score = 0.0
         max_score = questions_to_ask * 1.0
 
         for i in range(0, questions_to_ask):
-            actual = self.ask(i if not self.__shuffle else None)
-            translation = self.__dictionary.pick_random() if self.__shuffle else self.__dictionary[i]
-            self.__ui.ask_question(translation.word, (i+1, questions_to_ask))
-            score += self.score_answer(translation, actual)
+            question_id = i if not self.__shuffle else self.__dictionary.pick_random_id()
+            question = self.__dictionary[question_id]
 
-        self.__ui.summarize(score, max_score)
+            actual = ui.ask_question(question.word, (i+1, questions_to_ask))
+            score += self.score_answer(ui, question, actual)
 
-    def ask(self, id):
-        if not id:
-            id = self.__dictionary.pick_random()
+        ui.summarize(score, max_score)
 
-        question = self.__dictionary[id]
-        self.__ui.ask_question(question.word)
-
-    def score_answer(self, translation, actual):
+    @staticmethod
+    def score_answer(ui, translation, actual):
         for acceptable in translation.accepted:
             if acceptable.match(actual):
-                self.__ui.tell_answer_was_correct(translation.accepted)
+                ui.tell_answer_was_correct(translation.accepted)
                 return 1.0
 
-        self.__ui.tell_answer_was_wrong(translation.accepted)
+        ui.tell_answer_was_wrong(translation.accepted)
         return 0.0
 
 
@@ -123,7 +117,8 @@ class FromFileDictionary:
                 key, matchers = self.__from_line(line)
                 self.__add(key, matchers)
 
-    def __from_line(self, line):
+    @staticmethod
+    def __from_line(line):
         elements = [e.strip() for e in re.sub('#.*$', '', line).split(';')]
 
         if len(elements) != 2:
@@ -141,11 +136,12 @@ class FromFileDictionary:
         self.__keys.add(key)
         self.__dict.append(Translation(key, self.__parse_entries(matchers)))
 
-    def __parse_entries(self, elements):
+    @staticmethod
+    def __parse_entries(elements):
         return [WordMatcher(e) for e in elements.split(',')]
 
-    def pick_random(self):
-        return choice(self.__dict)
+    def pick_random_id(self):
+        return random.randrange(len(self.__dict))
 
 
 class CachedDictionaries(object):
@@ -231,10 +227,10 @@ class Application:
 
     def run(self):
         try:
-            Repertoaari(self.ui, FromFileDictionary(self.config.dictionary)) \
+            Repertoaari(FromFileDictionary(self.config.dictionary)) \
                 .with_num_of_questions(self.config.number) \
                 .with_shuffle_enabled(not self.config.no_shuffle) \
-                .run()
+                .run(self.ui)
         except SetUpFailed as e:
             self.ui.display_fatal_error(e.code, e.args)
 
