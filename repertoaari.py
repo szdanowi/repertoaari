@@ -162,12 +162,12 @@ class WordMatcher:
 
 
 class FromFileDictionary:
-    def __init__(self, filename, name):
+    def __init__(self, filename, name=None):
         self.__dict = []
         self.__keys = set()
         self.left = "Left"
         self.right = "Right"
-        self.name = name
+        self.name = name or filename
 
         try:
             self.__load_from(filename)
