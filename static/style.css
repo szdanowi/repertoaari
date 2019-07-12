@@ -131,6 +131,7 @@ input.answer, input.wrong, input.correct {
   color: #1e5162;
   font-size: 1em;
   text-align: center;
+  outline: none;
 }
 
 input.correct {
