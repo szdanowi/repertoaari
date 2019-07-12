@@ -75,7 +75,7 @@ class Repertoaari:
 
         ui.display_dictionary_name(dictionary.name)
         ui.display_direction(dictionary.left, dictionary.right)
-        for question_id in [dictionary.pick_random_id() for i in range(0, words)]:
+        for question_id in dictionary.pick_random_ids(words):
             question = dictionary[question_id]
             ui.ask_for(str(question_id), question.word, None)
 
@@ -214,6 +214,10 @@ class FromFileDictionary:
 
     def pick_random_id(self):
         return random.randrange(len(self.__dict))
+
+    def pick_random_ids(self, number):
+        method = random.sample if number <= len(self.__dict) else random.choices
+        return method(range(len(self.__dict)), k=number)
 
 
 class CachedDictionaries(object):
