@@ -27,7 +27,7 @@
                 {% else %}
                     <input class="{{ entry.left_class }}" type="text" name="answer_{{ entry.pos }}_{{ entry.id }}_left" value="{{ entry.left }}">
                     {% if entry.left_note is not none %}
-                        <p class="note">{{ entry.left_note }}</p>
+                        <p class="note-{{ entry.left_class }}">{{ entry.left_note }}</p>
                     {% endif %}
                 {% endif %}
                 </td>
@@ -37,7 +37,7 @@
                 {% else %}
                     <input class="{{ entry.right_class }}" type="text" name="answer_{{ entry.pos }}_{{ entry.id }}_right" value="{{ entry.right }}">
                     {% if entry.right_note is not none %}
-                        <p class="note">{{ entry.right_note }}</p>
+                        <p class="note-{{ entry.right_class }}">{{ entry.right_note }}</p>
                     {% endif %}
                 {% endif %}
                 </td>
