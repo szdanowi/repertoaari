@@ -1,15 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Could not find your page</title>
-    <link rel="stylesheet" href="{{ stylesheet }}" type="text/css">
-</head>
-<body>
-    <div id="menu">Reperto<strong>aari</strong></div>
-    <div id="content">
-        <h1 class="error_title">Something went wrong!</h1>
-        <p>The page you requested could not be found:<br /><em>{{ method }} {{ path }}</em></p>
-    </div>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Could not find your page{% endblock %}
+{% block content %}
+    <h1 class="error_title">Something went wrong!</h1>
+    <p>The page you requested could not be found:<br /><em>{{ method }} {{ path }}</em></p>
+{% endblock %}

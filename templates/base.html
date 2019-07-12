@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ stylesheet }}" type="text/css">
+</head>
+<body>
+    <div id="menu">
+        <p id="app-name">Reperto<strong>aari</strong></p>
+        <ul>
+            {% if dict_name is defined %}
+                <li><a href="{{ exam_href }}">new exam</a></li>
+                <li><a href="{{ dict_href }}">{{ dict_name }}</a></li>
+            {% endif %}
+        </ul>
+    </div>
+    <div id="content">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

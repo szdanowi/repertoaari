@@ -1,25 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Dictionary listing for: {{ dict_file }}</title>
-    <link rel="stylesheet" href="{{ stylesheet }}" type="text/css">
-</head>
-<body>
-    <div id="menu">Reperto<strong>aari</strong></div>
-    <div id="content">
-    <h1>Dictionary listing for: <em>{{ dict_file }}</em></h1>
+{% extends "base.html" %}
+{% block title %}Dictionary listing for: {{ dict_name }}{% endblock %}
+{% block content %}
+    <h1>Dictionary listing for: <em>{{ dict_name }}</em></h1>
 
     <table class="listing">
         <thead>
-            <tr><td>{{ head[0] }}</td><td>{{ head[1] }}</td></tr>
+            <tr><td>{{ left_title }}</td><td>{{ right_title }}</td></tr>
         </thead>
         <tbody>
             {% for entry in entries %}
-            <tr><td>{{ entry[0] }}</td><td>{{ entry[1] }}</td></tr>
+            <tr class="row"><td><p>{{ entry.left }}</p></td><td><p>{{ entry.right }}</p></td></tr>
             {% endfor %}
         </tbody>
     </table>
-    </div>
-</body>
-</html>
+{% endblock %}

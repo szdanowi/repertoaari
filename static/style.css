@@ -17,23 +17,50 @@ div#menu {
   margin: 0em 0em 3em 0em;
   background-color: lightblue;
   color: white;
+  height: 1.5em;
 
   font-size: 1em;
   font-style: normal;
+}
+
+p#app-name {
+  float: left;
+  margin: 0em;
   font-weight: 300;
   font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
   text-transform: uppercase;
+  line-height: 1.5em;
+  vertical-align: bottom;
 }
 
-strong {
+p#app-name strong {
   font-size: 1.5em;
   font-weight: 500;
   text-transform: lowercase;
 }
 
+div#menu ul {
+  float: right;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+div#menu li {
+  margin: 1em;
+  display: inline;
+  line-height: 1.5em;
+  vertical-align: bottom;
+}
+
+div#menu li a {
+  color: white;
+  text-decoration: none;
+}
+
 div#content {
   margin: auto;
-  margin-bottom: 3em;
+  margin-bottom: 2em;
   max-width: 64em;
 }
 
@@ -76,17 +103,21 @@ td {
   vertical-align: baseline;
 }
 
-table thead {
+thead {
   font-weight: normal;
 }
 
-table thead td {
+thead td {
   background-color: #d8edf3;
   padding: 0.5em;
 }
 
-table tfoot td {
+tfoot td {
   text-align: right;
+}
+
+td p {
+  margin: 0.5em 0em;
 }
 
 input.answer, input.wrong, input.correct {
@@ -120,10 +151,6 @@ input.button {
 
   color: white;
   font-size: 1em;
-}
-
-p {
-  line-height: 1.5em;
 }
 
 p.note, p.note-correct, p.note-wrong {

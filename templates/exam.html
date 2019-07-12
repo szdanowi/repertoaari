@@ -1,13 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Exam</title>
-    <link rel="stylesheet" href="{{ stylesheet }}" type="text/css">
-</head>
-<body>
-    <div id="menu">Reperto<strong>aari</strong></div>
-    <div id="content">
+{% extends "base.html" %}
+{% block title %}Exam for: {{ dict_name }}{% endblock %}
+{% block content %}
     <h1>Exam</h1>
 
     {% if points_awarded is defined %}
@@ -52,6 +45,4 @@
             </td></tr>
         </tbody>
     </table></form>
-    </div>
-</body>
-</html>
+{% endblock %}

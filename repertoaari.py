@@ -73,6 +73,7 @@ class Repertoaari:
         if words > 256:
             raise InvalidRequest("We do not support more than 256 words in an exam (requested {0} words)".format(words))
 
+        ui.display_dictionary_name(dictionary.name)
         ui.display_direction(dictionary.left, dictionary.right)
         for question_id in [dictionary.pick_random_id() for i in range(0, words)]:
             question = dictionary[question_id]
@@ -95,6 +96,7 @@ class Repertoaari:
             raise InvalidRequest("We do not support more than 256 words in an exam to assess (submitted {0} words)".format(submitted_answers))
 
         result = 0
+        ui.display_dictionary_name(dictionary.name)
         ui.display_direction(dictionary.left, dictionary.right)
         for answer in answers:
             question = dictionary[int(answer.question_id)]
@@ -160,11 +162,12 @@ class WordMatcher:
 
 
 class FromFileDictionary:
-    def __init__(self, filename):
+    def __init__(self, filename, name):
         self.__dict = []
         self.__keys = set()
         self.left = "Left"
         self.right = "Right"
+        self.name = name
 
         try:
             self.__load_from(filename)
@@ -223,7 +226,7 @@ class CachedDictionaries(object):
             self.__all.clear()
 
         if not name in self.__all:
-            self.__all[name] = FromFileDictionary(os.path.dirname(os.path.abspath(__file__)) + '/' + name)
+            self.__all[name] = FromFileDictionary(os.path.dirname(os.path.abspath(__file__)) + '/' + name + '.dict', name)
 
         self.__current = self.__all[name]
         return self.__current
