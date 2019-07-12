@@ -33,6 +33,7 @@ strong {
 
 div#content {
   margin: auto;
+  margin-bottom: 3em;
   max-width: 64em;
 }
 
@@ -63,6 +64,10 @@ table {
   table-layout: fixed;
 }
 
+tr.row:hover {
+  background: #ebf6f9;
+}
+
 td {
   padding: 0em;
   margin: 1em;
@@ -76,7 +81,7 @@ table thead {
 }
 
 table thead td {
-  background-color: #ebf6f9;
+  background-color: #d8edf3;
   padding: 0.5em;
 }
 
