@@ -159,6 +159,7 @@ p.note, p.note-correct, p.note-wrong {
   margin: 0.1em 0em 0em;
   color: #1e5162;
   font-size: 0.9em;
+  text-align: center;
 }
 
 p.note-correct {
@@ -185,4 +186,60 @@ p.result {
   font-size: 2em;
   color: white;
   background-color: lightblue;
+}
+
+div.flash_card {
+  display: table;
+  width: 100%;
+  margin: 0.2em 0em 0em;
+}
+
+div.flash_pair {
+  display: table-row;
+}
+
+p.language_label {
+  padding: 0.5em;
+  display: table-cell;
+  text-align: center;
+  font-weight: bold;
+}
+
+p.language_label:after {
+  content: " :";
+}
+
+p.given_word_label {
+  display: table-cell;
+  text-align: center;
+}
+
+div.result_form {
+  margin: 0em 0em 2em;
+  width: 100%;
+  display: table;
+  table-layout: fixed;
+  color: white;
+  background-color: lightblue;
+}
+
+div.result_entry {
+  display: table-row;
+}
+
+p.result_entry_label {
+  display: table-cell;
+  padding: 0.75em;
+}
+
+p.result_entry_value {
+  display: table-cell;
+  padding: 0.5em;
+}
+
+div.centered-content {
+  width: 100%;
+  margin: 0em;
+  padding: 0em;
+  text-align: center;
 }

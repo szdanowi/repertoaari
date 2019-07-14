@@ -21,6 +21,49 @@ class InvalidRequest(RuntimeError):
         RuntimeError.__init__(self, what)
 
 
+class FlashContext:
+    def __init__(self, dictionary):
+        self.dictionary = dictionary
+        self.question_ids = []
+        self.answers = []
+
+    def __str__(self):
+        zipped = zip(self.question_ids, self.answers)
+        return '\n'.join([self.dictionary.name, '\n'.join(['\n'.join([str(element) for element in pair]) for pair in zipped])])
+
+    def __repr__(self):
+        return str(self)
+
+    @staticmethod
+    def from_str(s, dictionary):
+        elements = [e.strip() for e in s.split('\n')]
+        if elements[0] != dictionary.name:
+            raise InvalidRequest('Previously used dictionary does not match with the current one: "{0}" vs "{1}"'
+                .format(elements[0], dictionary.name))
+
+        result = FlashContext(dictionary)
+
+        for i in range(2, len(elements), 2):
+            result.question_ids.append(elements[i - 1])
+            result.answers.append(elements[i])
+
+        return result
+
+    def add_answer(self, question_id, answer):
+        self.question_ids.append(question_id)
+        self.answers.append(str(answer).replace('\n', ' '))
+
+    def __len__(self):
+        return len(self.question_ids)
+
+    def correct(self):
+        correct = 0
+        for i in range(len(self.question_ids)):
+            if self.dictionary[self.question_ids[i]].any_matches(self.answers[i]):
+                correct += 1
+        return correct
+
+
 class Repertoaari:
     def __init__(self, dictionary):
         self.__dictionary = dictionary
@@ -117,6 +160,38 @@ class Repertoaari:
 
         ui.display_summary(result, len(answers))
 
+    @staticmethod
+    def show_flash(ui, dictionary, context=None):
+        if not context:
+            context = FlashContext(dictionary)
+
+        ui.display_dictionary_name(dictionary.name)
+
+        question_id = dictionary.pick_random_id()
+        question = dictionary[question_id]
+        ui.ask_for(str(question_id), dictionary.left, question.word, dictionary.right)
+        Repertoaari.update_context(ui, context)
+
+    @staticmethod
+    def assess_flash(ui, dictionary, question_id, answer, context=None):
+        if not context:
+            context = FlashContext(dictionary)
+
+        ui.display_dictionary_name(dictionary.name)
+
+        question = dictionary[int(question_id)]
+        matched = question.any_matches(answer)
+        ui.show_assessment(str(question_id), dictionary.left, question.word, dictionary.right, answer, question.accepted(), matched)
+
+        context.add_answer(question_id, answer)
+        Repertoaari.update_context(ui, context)
+
+    @staticmethod
+    def update_context(ui, context):
+        correct = context.correct()
+        ui.display_state(str(correct), str(len(context)), '{0:.2f}%'.format(100.0 * correct / float(len(context))))
+        ui.store_context(context)
+
 
 class Translation(object):
     def __init__(self, word, accepted_translations):
@@ -178,7 +253,7 @@ class FromFileDictionary:
         return len(self.__keys)
 
     def __getitem__(self, item):
-        return self.__dict[item]
+        return self.__dict[int(item)]
 
     def __load_from(self, filename):
         with open(filename, mode='rt', encoding='UTF-8') as f:

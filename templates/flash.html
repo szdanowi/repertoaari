@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Flash card for: {{ dict_name }}{% endblock %}
+{% block content %}
+    <h1>Flash card</h1>
+
+    {% if result is defined %}
+    <div class="result_form">
+        <div class="result_entry">
+            <p class="result_entry_label">Correct answers:</p>
+            <p class="result_entry_value">{{ result.correct }}</p>
+            <p class="result_entry_value">{{ result.percent }}</p>
+        </div>
+        <div class="result_entry">
+            <p class="result_entry_label">Total answers:</p>
+            <p class="result_entry_value">{{ result.total }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <form method="post" autocomplete="off" action="{{ action }}">
+        <div class="flash_card">
+            <div class="flash_pair">
+                <p class="language_label">{{ given_language }}</p>
+                <p class="given_word_label">{{ given_word }}</p>
+            </div>
+            <div class="flash_pair">
+                <p class="language_label">{{ answer.language }}</p>
+
+            {% if answer.value is not none %}
+                <input class="{{ answer.style }}" type="text" name="answer" value="{{ answer.value }}" readonly>
+                <p class="{{ answer.note_style }}">{{ answer.note }}</p>
+            {% else %}
+                <input type="hidden" name="id" value="{{ id }}">
+                <input class="answer" type="text" name="answer" value="">
+            {% endif %}
+            </div>
+        </div>
+
+        <div class="centered-content">
+            {% if answer.value is not none %}
+            <input class="button" type="submit" value="Next">
+            {% else %}
+            <input class="button" type="submit" value="Check your answer">
+            {% endif %}
+        </div>
+
+        {% if context is defined %}
+        <input type="hidden" name="context" value="{{ context }}">
+        {% endif %}
+    </form>
+{% endblock %}
