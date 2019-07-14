@@ -188,8 +188,10 @@ class Repertoaari:
 
     @staticmethod
     def update_context(ui, context):
-        correct = context.correct()
-        ui.display_state(str(correct), str(len(context)), '{0:.2f}%'.format(100.0 * correct / float(len(context))))
+        correct_answers = context.correct()
+        questions_asked = len(context)
+        percentage = 100.0 * correct_answers / float(questions_asked) if questions_asked > 0 else 0.0
+        ui.display_state(str(correct_answers), str(questions_asked), '{0:.2f}%'.format(percentage))
         ui.store_context(context)
 
 
