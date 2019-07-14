@@ -229,6 +229,9 @@ class CachedDictionaries(object):
         if len(self.__all) > 10:
             self.__all.clear()
 
+        if not re.match('^[0-9A-Za-z._-]+$', name):
+            raise InvalidRequest("Dictionary name '{0}' is not supported - names may not contain special letters".format(name))
+
         if not name in self.__all:
             self.__all[name] = FromFileDictionary(os.path.dirname(os.path.abspath(__file__)) + '/' + name + '.dict', name)
 
