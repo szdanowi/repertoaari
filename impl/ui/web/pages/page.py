@@ -13,5 +13,5 @@ class Page:
     def display_dictionary_name(self, name):
         self.kwargs["dict_name"] = name
         self.kwargs["dict_href"] = url_for('show_dictionary_listing', dict_file=name)
-        self.kwargs["exam_href"] = url_for('show_exam_ltr', dict_file=name, words=12)
+        self.kwargs["exam_href"] = url_for('show_exam', dict_file=name, words=12)
         return self

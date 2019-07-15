@@ -22,32 +22,27 @@ class InvalidRequest(RuntimeError):
 
 
 class FlashContext:
-    def __init__(self, dictionary):
-        self.dictionary = dictionary
+    def __init__(self):
         self.question_ids = []
         self.answers = []
 
     def __str__(self):
         zipped = zip(self.question_ids, self.answers)
-        return '\n'.join([self.dictionary.name, '\n'.join(['\n'.join([str(element) for element in pair]) for pair in zipped])])
+        return '\n'.join(['\n'.join([str(element) for element in pair]) for pair in zipped])
 
     def __repr__(self):
         return str(self)
 
     @staticmethod
-    def from_str(text, dictionary):
+    def from_str(text):
+        result = FlashContext()
+
         if not text:
-            return FlashContext(dictionary)
+            return result
 
         elements = [e.strip() for e in text.split('\n')]
 
-        if elements[0] != dictionary.name:
-            raise InvalidRequest('Previously used dictionary does not match with the current one: "{0}" vs "{1}"'
-                .format(elements[0], dictionary.name))
-
-        result = FlashContext(dictionary)
-
-        for i in range(2, len(elements), 2):
+        for i in range(1, len(elements), 2):
             result.question_ids.append(elements[i - 1])
             result.answers.append(elements[i])
 
@@ -60,17 +55,17 @@ class FlashContext:
     def __len__(self):
         return len(self.question_ids)
 
-    def correct(self):
+    def correct(self, dictionary):
         correct = 0
         for i in range(len(self.question_ids)):
-            if self.dictionary[self.question_ids[i]].any_matches(self.answers[i]):
+            if dictionary[self.question_ids[i]].any_matches(self.answers[i]):
                 correct += 1
         return correct
 
 
 class Repertoaari:
-    def __init__(self, dictionary):
-        self.__dictionary = dictionary
+    def __init__(self, dictionary=None):
+        self.__dictionary = dictionary or CachedDictionaries()
         self.__number_of_questions = 1
         self.__shuffle = True
 
@@ -109,8 +104,7 @@ class Repertoaari:
         ui.tell_answer_was_wrong(translation.accepted())
         return 0.0
 
-    @staticmethod
-    def show_left_to_right_exam(ui, dictionary, words):
+    def show_exam(self, ui, dictionary_name, words):
         if not isinstance(words, int):
             raise InvalidRequest("Number of requested words for quiz is not an integer")
 
@@ -120,11 +114,14 @@ class Repertoaari:
         if words > 256:
             raise InvalidRequest("We do not support more than 256 words in an exam (requested {0} words)".format(words))
 
+        dictionary = self.__dictionary.load(dictionary_name)
         ui.display_dictionary_name(dictionary.name)
         ui.display_direction(dictionary.left, dictionary.right)
         for question_id in dictionary.pick_random_ids(words):
             question = dictionary[question_id]
             ui.ask_for(str(question_id), question.word, None)
+
+        return ui
 
     class Answer:
         def __init__(self, question_id, side, answer):
@@ -132,8 +129,7 @@ class Repertoaari:
             self.side = side
             self.given = answer
 
-    @staticmethod
-    def assess_exam(ui, dictionary, answers):
+    def assess_exam(self, ui, dictionary_name, answers):
         submitted_answers = len(answers)
 
         if submitted_answers < 1:
@@ -143,6 +139,7 @@ class Repertoaari:
             raise InvalidRequest("We do not support more than 256 words in an exam to assess (submitted {0} words)".format(submitted_answers))
 
         result = 0
+        dictionary = self.__dictionary.load(dictionary_name)
         ui.display_dictionary_name(dictionary.name)
         ui.display_direction(dictionary.left, dictionary.right)
         for answer in answers:
@@ -163,24 +160,21 @@ class Repertoaari:
             ui.show_assessment(answer.question_id, question.word, answer.given, left_matched, right_matched, left_note, right_note)
 
         ui.display_summary(result, len(answers))
+        return ui
 
-    @staticmethod
-    def show_flash(ui, dictionary, context=None):
-        if not context:
-            context = FlashContext(dictionary)
-
+    def show_flash(self, ui, dictionary_name, context):
+        dictionary = self.__dictionary.load(dictionary_name)
         ui.display_dictionary_name(dictionary.name)
 
         question_id = dictionary.pick_random_id()
         question = dictionary[question_id]
         ui.ask_for(str(question_id), dictionary.left, question.word, dictionary.right)
-        Repertoaari.update_context(ui, context)
+        Repertoaari.update_context(ui, context, dictionary)
 
-    @staticmethod
-    def assess_flash(ui, dictionary, question_id, answer, context=None):
-        if not context:
-            context = FlashContext(dictionary)
+        return ui
 
+    def assess_flash(self, ui, dictionary_name, question_id, answer, context):
+        dictionary = self.__dictionary.load(dictionary_name)
         ui.display_dictionary_name(dictionary.name)
 
         question = dictionary[int(question_id)]
@@ -188,23 +182,28 @@ class Repertoaari:
         ui.show_assessment(str(question_id), dictionary.left, question.word, dictionary.right, answer, question.accepted(), matched)
 
         context.add_answer(question_id, answer)
-        Repertoaari.update_context(ui, context)
+        Repertoaari.update_context(ui, context, dictionary)
+
+        return ui
 
     @staticmethod
-    def update_context(ui, context):
-        correct_answers = context.correct()
+    def update_context(ui, context, dictionary):
+        correct_answers = context.correct(dictionary)
         questions_asked = len(context)
         percentage = 100.0 * correct_answers / float(questions_asked) if questions_asked > 0 else 0.0
         ui.display_state(str(correct_answers), str(questions_asked), '{0:.2f}%'.format(percentage))
         ui.store_context(context)
 
-    @staticmethod
-    def show_dictionary(ui, dictionary):
+    def show_dictionary(self, ui, dictionary_name):
+        dictionary = self.__dictionary.load(dictionary_name)
+
         ui.display_dictionary_name(dictionary.name)
         ui.display_direction(dictionary.left, dictionary.right)
 
         for entry in dictionary:
             ui.display_entry(entry.word, entry.accepted())
+
+        return ui
 
 
 class Translation(object):
