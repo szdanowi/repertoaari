@@ -1,9 +1,31 @@
 from flask import Flask, render_template, url_for, abort, request
-from repertoaari import CachedDictionaries, NoSuchDictionary, Repertoaari, FlashContext
+from repertoaari import CachedDictionaries, NoSuchDictionary, Repertoaari, FlashContext, InvalidRequest
 
 flask_app = Flask(__name__)
 dictionaries = CachedDictionaries()
 repertoaari = Repertoaari(dictionaries)
+
+
+class Page:
+    def __init__(self, template):
+        self.template = template
+        self.kwargs = dict()
+        self.kwargs['stylesheet'] = url_for('static', filename='style.css')
+
+    def render(self):
+        return render_template(self.template, **self.kwargs)
+
+    def display_dictionary_name(self, name):
+        self.kwargs["dict_name"] = name
+        self.kwargs["dict_href"] = url_for('show_dictionary_listing', dict_file=name)
+        self.kwargs["exam_href"] = url_for('show_exam_ltr', dict_file=name, words=12)
+        return self
+
+
+class ErrorPage(Page):
+    def display_error(self, error):
+        self.kwargs["error"] = error
+        return self
 
 
 @flask_app.route("/")
@@ -12,31 +34,23 @@ def hello():
 
 
 @flask_app.errorhandler(404)
-def page_not_found(error):
-    return render_template(
-        'page_not_found.html',
-        path=request.path,
-        method=request.method
-    ), 404
+def on_page_not_found(error):
+    return ErrorPage('page_not_found.html').display_error('{0} {1}'.format(request.method, request.path)).render(), 404
 
 
 @flask_app.errorhandler(500)
-def page_not_found(error):
-    return render_template(
-        'internal_server_error.html',
-        error=error.description
-    ), 500
+def on_server_error(error):
+    return ErrorPage('error.html').display_error(error.description).render(), 500
 
 
-class Page:
-    def __init__(self):
-        self.kwargs = dict()
-        self.kwargs['stylesheet'] = url_for('static', filename='style.css')
+@flask_app.errorhandler(InvalidRequest)
+def on_invalid_request(error):
+    return ErrorPage('error.html').display_error(error).render(), 400
 
-    def display_dictionary_name(self, name):
-        self.kwargs["dict_name"] = name
-        self.kwargs["dict_href"] = url_for('show_dictionary_listing', dict_file=name)
-        self.kwargs["exam_href"] = url_for('show_exam_ltr', dict_file=name, words=12)
+
+@flask_app.errorhandler(NoSuchDictionary)
+def on_invalid_dictionary(error):
+    return on_page_not_found(error)
 
 
 class TabularPage(Page):
@@ -87,68 +101,38 @@ class TabularPage(Page):
 
 @flask_app.route("/<dict_file>/list")
 def show_dictionary_listing(dict_file):
-    try:
-        selected = dictionaries.load(dict_file)
+    dictionary = dictionaries.load(dict_file)
 
-        page = TabularPage()
-        page.display_dictionary_name(dict_file)
-        page.display_direction(selected.left, selected.right)
+    page = TabularPage('listing.html')
+    repertoaari.show_dictionary(page, dictionary)
 
-        for entry in selected:
-            page.display_entry(entry.word, entry.accepted())
-
-        return render_template(
-            'listing.html',
-            **page.kwargs)
-
-    except RuntimeError as e:
-        abort(500, str(e))
-
-    except NoSuchDictionary:
-        abort(404)
+    return page.render()
 
 
 @flask_app.route("/<dict_file>/exam/random-<int:words>", methods=['GET'])
 def show_exam_ltr(dict_file, words):
-    try:
-        page = TabularPage()
+    page = TabularPage('exam.html')
 
-        dictionary = dictionaries.load(dict_file)
-        repertoaari.show_left_to_right_exam(page, dictionary, words)
+    dictionary = dictionaries.load(dict_file)
+    repertoaari.show_left_to_right_exam(page, dictionary, words)
 
-        return render_template(
-            'exam.html',
-            **page.kwargs)
-
-    except RuntimeError as e:
-        abort(500, str(e))
-
-    except NoSuchDictionary:
-        abort(404)
+    return page.render()
 
 
 @flask_app.route("/<dict_file>/exam/random-<int:words>", methods=['POST'])
 def assess_exam_ltr(dict_file, words):
-    try:
-        page = TabularPage()
+    page = TabularPage('exam.html')
 
-        answers = []
-        for key in sorted(request.form.keys()):
-            if key.strip().startswith('answer_'):
-                elements = key.strip().split('_')
-                answers.append(Repertoaari.Answer(elements[2], elements[3], request.form[key]))
+    answers = []
+    for key in sorted(request.form.keys()):
+        if key.strip().startswith('answer_'):
+            elements = key.strip().split('_')
+            answers.append(Repertoaari.Answer(elements[2], elements[3], request.form[key]))
 
-        dictionary = dictionaries.load(dict_file)
-        repertoaari.assess_exam(page, dictionary, answers)
-        return render_template(
-            'exam.html',
-            **page.kwargs)
+    dictionary = dictionaries.load(dict_file)
+    repertoaari.assess_exam(page, dictionary, answers)
 
-    except RuntimeError as e:
-        abort(500, str(e))
-
-    except NoSuchDictionary:
-        abort(404)
+    return page.render()
 
 
 class FlashPage(Page):
@@ -175,8 +159,9 @@ class FlashPage(Page):
         self.kwargs['given_word'] = given_word
         self.kwargs['answer'] = self.Answer(answer_language)
 
-    def set_next(self, action):
-        self.kwargs['action'] = action
+    def with_next(self, action, **kwargs):
+        self.kwargs['action'] = url_for(action, **kwargs)
+        return self
 
     def show_assessment(self, question_id, given_language, given_word, answer_language, answer, expected, matched):
         self.kwargs['id'] = question_id
@@ -193,41 +178,21 @@ class FlashPage(Page):
 
 @flask_app.route("/<dict_file>/flash", methods=['GET', 'POST'])
 def show_flash(dict_file):
-    try:
-        page = FlashPage()
-        page.set_next(url_for('show_assess_flash', dict_file=dict_file))
+    page = FlashPage('flash.html').with_next('show_assess_flash', dict_file=dict_file)
 
-        dictionary = dictionaries.load(dict_file)
-        context = FlashContext.from_str(request.form['context'], dictionary) if 'context' in request.form.keys() else None
-        repertoaari.show_flash(page, dictionary, context)
+    dictionary = dictionaries.load(dict_file)
+    context = FlashContext.from_str(request.form.get('context'), dictionary)
+    repertoaari.show_flash(page, dictionary, context)
 
-        return render_template(
-            'flash.html',
-            **page.kwargs)
-
-    except RuntimeError as e:
-        abort(500, str(e))
-
-    except NoSuchDictionary:
-        abort(404)
+    return page.render()
 
 
 @flask_app.route("/<dict_file>/assess_flash", methods=['POST'])
 def show_assess_flash(dict_file):
-    try:
-        page = FlashPage()
-        page.set_next(url_for('show_flash', dict_file=dict_file))
+    page = FlashPage('flash.html').with_next('show_flash', dict_file=dict_file)
 
-        dictionary = dictionaries.load(dict_file)
-        context = FlashContext.from_str(request.form['context'], dictionary) if 'context' in request.form.keys() else None
-        repertoaari.assess_flash(page, dictionary, request.form['id'], request.form['answer'], context)
+    dictionary = dictionaries.load(dict_file)
+    context = FlashContext.from_str(request.form.get('context'), dictionary)
+    repertoaari.assess_flash(page, dictionary, request.form['id'], request.form['answer'], context)
 
-        return render_template(
-            'flash.html',
-            **page.kwargs)
-
-    except RuntimeError as e:
-        abort(500, str(e))
-
-    except NoSuchDictionary:
-        abort(404)
+    return page.render()

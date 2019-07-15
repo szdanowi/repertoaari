@@ -35,8 +35,12 @@ class FlashContext:
         return str(self)
 
     @staticmethod
-    def from_str(s, dictionary):
-        elements = [e.strip() for e in s.split('\n')]
+    def from_str(text, dictionary):
+        if not text:
+            return FlashContext(dictionary)
+
+        elements = [e.strip() for e in text.split('\n')]
+
         if elements[0] != dictionary.name:
             raise InvalidRequest('Previously used dictionary does not match with the current one: "{0}" vs "{1}"'
                 .format(elements[0], dictionary.name))
@@ -193,6 +197,14 @@ class Repertoaari:
         percentage = 100.0 * correct_answers / float(questions_asked) if questions_asked > 0 else 0.0
         ui.display_state(str(correct_answers), str(questions_asked), '{0:.2f}%'.format(percentage))
         ui.store_context(context)
+
+    @staticmethod
+    def show_dictionary(ui, dictionary):
+        ui.display_dictionary_name(dictionary.name)
+        ui.display_direction(dictionary.left, dictionary.right)
+
+        for entry in dictionary:
+            ui.display_entry(entry.word, entry.accepted())
 
 
 class Translation(object):
