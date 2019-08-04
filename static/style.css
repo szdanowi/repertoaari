@@ -8,14 +8,14 @@ body {
   padding: 0em;
 
   text-align: justify;
-  font-family: "DejaVu Sans", sans-serif;
-  font-weight: lighter;
+  font-family: 'Roboto', 'Open Sans', 'DejaVu Sans', sans-serif;
+  font-weight: 300;
 }
 
 div#menu {
   padding: 1em;
   margin: 0em 0em 3em 0em;
-  background-color: lightblue;
+  background-color: #8ac7db;
   color: white;
   height: 1.5em;
 
@@ -27,14 +27,14 @@ p#app-name {
   float: left;
   margin: 0em;
   font-weight: 300;
-  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  font-family: "Noto Serif", "Palatino Linotype", "Book Antiqua", Palatino, serif;
   text-transform: uppercase;
   line-height: 1.5em;
   vertical-align: bottom;
 }
 
 p#app-name strong {
-  font-size: 1.5em;
+  font-size: 1.4em;
   font-weight: 500;
   text-transform: lowercase;
 }
@@ -69,7 +69,7 @@ h1 {
   padding: 0em 1em 1em;
   border-left: solid 1px;
   font-size: 1.5em;
-  font-weight: lighter;
+  font-weight: 100;
 }
 
 h1.error_title:after {
@@ -185,7 +185,7 @@ p.result {
   padding: 1em 1em;
   font-size: 2em;
   color: white;
-  background-color: lightblue;
+  background-color: #8ac7db;
 }
 
 div.flash_card {
@@ -202,7 +202,7 @@ p.language_label {
   padding: 0.5em;
   display: table-cell;
   text-align: center;
-  font-weight: bold;
+  font-weight: 500;
 }
 
 p.language_label:after {
@@ -220,7 +220,8 @@ div.result_form {
   display: table;
   table-layout: fixed;
   color: white;
-  background-color: lightblue;
+  background-color: #8ac7db;
+  font-weight: 400;
 }
 
 div.result_entry {
