@@ -23,12 +23,15 @@ class InvalidRequest(RuntimeError):
 
 class FlashContext:
     def __init__(self):
-        self.question_ids = []
-        self.answers = []
+        self.__scores = dict()
 
     def __str__(self):
-        zipped = zip(self.question_ids, self.answers)
-        return '\n'.join(['\n'.join([str(element) for element in pair]) for pair in zipped])
+        entries = []
+
+        for key in self.__scores.keys():
+            entries.append('{0}:{1}'.format(key, str(self.__scores[key])))
+
+        return '\n'.join(entries)
 
     def __repr__(self):
         return str(self)
@@ -40,27 +43,55 @@ class FlashContext:
         if not text:
             return result
 
-        elements = [e.strip() for e in text.split('\n')]
+        for entry in [e.strip() for e in text.split('\n')]:
+            elements = entry.split(':')
 
-        for i in range(1, len(elements), 2):
-            result.question_ids.append(elements[i - 1])
-            result.answers.append(elements[i])
+            if len(elements) is not 2:
+                continue
+
+            result.__scores[elements[0]] = FlashContext.Score.from_str(elements[1])
 
         return result
 
-    def add_answer(self, question_id, answer):
-        self.question_ids.append(question_id)
-        self.answers.append(str(answer).replace('\n', ' '))
+    class Score:
+        def __init__(self):
+            self.correct = 0
+            self.total = 0
 
-    def __len__(self):
-        return len(self.question_ids)
+        @staticmethod
+        def from_str(s):
+            elements = s.split('/')
+            result = FlashContext.Score()
+            result.correct = int(elements[0])
+            result.total = int(elements[1])
+            return result
 
-    def correct(self, dictionary):
-        correct = 0
-        for i in range(len(self.question_ids)):
-            if dictionary[self.question_ids[i]].any_matches(self.answers[i]):
-                correct += 1
-        return correct
+        def __str__(self):
+            return "{0}/{1}".format(self.correct, self.total)
+
+        def __repr__(self):
+            return str(self)
+
+        def award(self, score):
+            self.total += 1
+            self.correct += score
+
+    def add_assessment(self, question_id, score):
+        self.__scores.setdefault(str(question_id), self.Score()).award(score)
+
+    def total(self):
+        return sum([self.__scores[key].total for key in self.__scores.keys()])
+
+    def correct(self):
+        return sum([self.__scores[key].correct for key in self.__scores.keys()])
+
+    def ratio_of(self, id):
+        sid = str(id)
+        if sid not in self.__scores.keys():
+            return 0.0
+
+        entry = self.__scores[sid]
+        return entry.correct / float(entry.total)
 
 
 class Repertoaari:
@@ -166,12 +197,23 @@ class Repertoaari:
         dictionary = self.__dictionary.load(dictionary_name)
         ui.display_dictionary_name(dictionary.name)
 
-        question_id = dictionary.pick_random_id()
+        question_id = self.pick_question(dictionary, context)
         question = dictionary[question_id]
         ui.ask_for(str(question_id), dictionary.left, question.word, dictionary.right)
-        Repertoaari.update_context(ui, context, dictionary)
+        Repertoaari.update_context(ui, context)
 
         return ui
+
+    def pick_question(self, dictionary, context):
+        population = dictionary.ids()
+        chances = [self.__chance_of(id, context) for id in population]
+        return random.choices(population, weights=chances, k=1)[0]
+
+    @staticmethod
+    def __chance_of(id, context):
+        min_chance = 0.1
+        max_chance = 1.0
+        return min_chance + ((1.0 - context.ratio_of(id)) * (max_chance - min_chance))
 
     def assess_flash(self, ui, dictionary_name, question_id, answer, context):
         dictionary = self.__dictionary.load(dictionary_name)
@@ -181,15 +223,15 @@ class Repertoaari:
         matched = question.any_matches(answer)
         ui.show_assessment(str(question_id), dictionary.left, question.word, dictionary.right, answer, question.accepted(), matched)
 
-        context.add_answer(question_id, answer)
-        Repertoaari.update_context(ui, context, dictionary)
+        context.add_assessment(question_id, matched)
+        Repertoaari.update_context(ui, context)
 
         return ui
 
     @staticmethod
-    def update_context(ui, context, dictionary):
-        correct_answers = context.correct(dictionary)
-        questions_asked = len(context)
+    def update_context(ui, context):
+        correct_answers = context.correct()
+        questions_asked = context.total()
         percentage = 100.0 * correct_answers / float(questions_asked) if questions_asked > 0 else 0.0
         ui.display_state(str(correct_answers), str(questions_asked), '{0:.2f}%'.format(percentage))
         ui.store_context(context)
@@ -299,6 +341,9 @@ class FromFileDictionary:
     @staticmethod
     def __parse_entries(elements):
         return [WordMatcher(e) for e in elements.split(',')]
+
+    def ids(self):
+        return range(len(self.__dict))
 
     def pick_random_id(self):
         return random.randrange(len(self.__dict))
