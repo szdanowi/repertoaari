@@ -10,6 +10,10 @@
 </head>
 <body>
     <script>
+        if (!("ontouchstart" in document.documentElement)) {
+            document.documentElement.className += " not-touchscreen";
+        }
+
         function toggleMenu() {
             var menu_style = document.getElementById('menu').style;
             var hamburger = document.getElementById('menu-hamburger');

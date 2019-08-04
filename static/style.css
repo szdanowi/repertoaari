@@ -52,7 +52,7 @@ p#menu-hamburger {
   line-height: 1.5em;
 }
 
-p#menu-hamburger:hover {
+.not-touchscreen p#menu-hamburger:hover {
   background-color: #1e5162;
 }
 
@@ -60,7 +60,7 @@ p#menu-hamburger.clicked {
   background: #63b4cf;
 }
 
-p#menu-hamburger.clicked:hover {
+.not-touchscreen p#menu-hamburger.clicked:hover {
   background: #1e5162;
 }
 
@@ -95,7 +95,7 @@ div#menu li a {
   text-align: center;
 }
 
-div#menu li a:hover {
+.not-touchscreen div#menu li a:hover {
   background-color: #1e5162;
 }
 
