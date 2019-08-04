@@ -279,7 +279,7 @@ div.result-form .label {
   display: table-cell;
   color: white;
   white-space: nowrap;
-  padding: 1.5em;
+  padding: 1em;
 }
 
 div.result-form .value {
@@ -289,7 +289,7 @@ div.result-form .value {
 }
 
 div.result-form .button {
-  margin: 1em 1.5em 1em 1em;
+  margin: 1em;
 }
 
 div.centered-content {
