@@ -31,14 +31,14 @@
                 <p class="{{ answer.note_style }}">{{ answer.note }}</p>
             {% else %}
                 <input type="hidden" name="id" value="{{ id }}">
-                <input class="answer" type="text" name="answer" value="">
+                <input class="answer" type="text" name="answer" value="" autofocus>
             {% endif %}
             </div>
         </div>
 
         <div class="centered-content">
             {% if answer.value is not none %}
-            <input class="button" type="submit" value="Next">
+            <input class="button" type="submit" value="Next" autofocus>
             {% else %}
             <input class="button" type="submit" value="Check your answer">
             {% endif %}
