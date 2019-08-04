@@ -36,6 +36,13 @@ class FlashContext:
     def __repr__(self):
         return str(self)
 
+    def __contains__(self, item):
+        return str(item) in self.__scores.keys()
+
+    def __get(self, id):
+        sid = str(id)
+        return self.__scores[sid] if sid in self.__scores.keys() else self.Score()
+
     @staticmethod
     def from_str(text):
         result = FlashContext()
@@ -76,6 +83,9 @@ class FlashContext:
             self.total += 1
             self.correct += score
 
+        def ratio(self):
+            return self.correct / float(self.total) if self.total > 0 else 0.0
+
     def add_assessment(self, question_id, score):
         self.__scores.setdefault(str(question_id), self.Score()).award(score)
 
@@ -86,12 +96,12 @@ class FlashContext:
         return sum([self.__scores[key].correct for key in self.__scores.keys()])
 
     def ratio_of(self, id):
-        sid = str(id)
-        if sid not in self.__scores.keys():
-            return 0.0
+        entry = self.__get(id)
+        return entry.ratio()
 
-        entry = self.__scores[sid]
-        return entry.correct / float(entry.total)
+    def correct_total_of(self, id):
+        entry = self.__get(id)
+        return entry.correct, entry.total
 
 
 class Repertoaari:
@@ -225,6 +235,21 @@ class Repertoaari:
 
         context.add_assessment(question_id, matched)
         Repertoaari.update_context(ui, context)
+
+        return ui
+
+    def show_flash_stats(self, ui, dictionary_name, context):
+        dictionary = self.__dictionary.load(dictionary_name)
+        ui.display_dictionary_name(dictionary.name)
+        ui.display_direction(dictionary.left, dictionary.right)
+
+        for id in dictionary.ids():
+            entry = dictionary[id]
+            if id in context:
+                correct, total = context.correct_total_of(id)
+                ui.display_entry(entry.word, entry.accepted(), correct, total, context.ratio_of(id) * 100.0)
+            else:
+                ui.display_entry(entry.word, entry.accepted())
 
         return ui
 

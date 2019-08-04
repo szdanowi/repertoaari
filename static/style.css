@@ -89,10 +89,12 @@ div#menu li a {
   color: white;
   text-decoration: none;
   padding: 1em 2em;
+  margin: 0;
   display: block;
   line-height: 1.5em;
   vertical-align: bottom;
   text-align: center;
+  cursor: pointer;
 }
 
 .not-touchscreen div#menu li a:hover {
@@ -286,4 +288,19 @@ div.centered-content {
   margin: 0em;
   padding: 0em;
   text-align: center;
+}
+
+div.progress-bar {
+  font-weight: 400;
+  text-align: left;
+  padding: 0;
+  margin: 0;
+  text-indent: 1.5em;
+  background-color: #ffb3b3;
+  overflow: visible;
+}
+
+div.progress-bar-done {
+  background-color: #b3ffb3;
+  padding: 0.5em 0;
 }

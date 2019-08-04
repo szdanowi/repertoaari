@@ -55,7 +55,7 @@ def assess_exam(dict_file, words):
 
 @flask_app.route("/<dict_file>/flash", methods=['GET', 'POST'])
 def show_flash(dict_file):
-    page = FlashPage('flash.html').with_next('show_assess_flash', dict_file=dict_file)
+    page = FlashPage('flash.html').with_next('show_assess_flash', dict_file=dict_file).with_stats_button(dict_file)
     context = FlashContext.from_str(request.form.get('context'))
 
     return repertoaari.show_flash(page, dict_file, context).render()
@@ -63,7 +63,13 @@ def show_flash(dict_file):
 
 @flask_app.route("/<dict_file>/assess_flash", methods=['POST'])
 def show_assess_flash(dict_file):
-    page = FlashPage('flash.html').with_next('show_flash', dict_file=dict_file)
+    page = FlashPage('flash.html').with_next('show_flash', dict_file=dict_file).with_stats_button(dict_file)
     context = FlashContext.from_str(request.form.get('context'))
 
     return repertoaari.assess_flash(page, dict_file, request.form['id'], request.form['answer'], context).render()
+
+
+@flask_app.route("/<dict_file>/flash_stats", methods=['POST'])
+def show_flash_stats(dict_file):
+    context = FlashContext.from_str(request.form.get('context'))
+    return repertoaari.show_flash_stats(StatsPage(), dict_file, context).render()

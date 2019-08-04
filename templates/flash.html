@@ -17,7 +17,17 @@
     </div>
     {% endif %}
 
-    <form method="post" autocomplete="off" action="{{ action }}">
+    <script>
+        function postTowards(address) {
+            var form = document.getElementById('main-form');
+            var previous_action = form.action;
+            form.action = address;
+            form.submit();
+            form.action = previous_action;
+        }
+    </script>
+
+    <form method="post" autocomplete="off" action="{{ action }}" id="main-form">
         <div class="flash_card">
             <div class="flash_pair">
                 <p class="language_label">{{ given_language }}</p>

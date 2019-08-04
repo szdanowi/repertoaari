@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Dictionary listing for: {{ dict_name }}{% endblock %}
+{% block content %}
+<h1>Stats for current flash quiz for: <em>{{ dict_name }}</em></h1>
+
+<table class="listing">
+  <thead>
+    <tr>
+      <td>{{ left_title }}</td>
+      <td>{{ right_title }}</td>
+      <td>Current result</td>
+    </tr>
+    </thead>
+    <tbody>
+      {% for entry in entries %}
+      <tr class="row">
+        <td><p>{{ entry.left }}</p></td>
+        <td><p>{{ entry.right }}</p></td>
+        <td class="progress">
+          {% if entry.percentage is not none %}
+          <div class="progress-bar">
+            <div class="progress-bar-done" style="width: {{ entry.percentage }}%">{{ entry.label }}</div>
+          </div>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endblock %}

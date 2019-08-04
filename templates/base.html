@@ -33,8 +33,11 @@
     <div id="menu">
       <ul>
           {% if dict_name is defined %}
-              <li><a href="{{ flash_href }}">Flash cards</a></li>
-              <li><a href="{{ exam_href }}">New exam</a></li>
+              <li><a href="{{ flash_href }}">New flash quiz</a></li>
+              {% if stats_href is defined %}
+                    <li><a href="#" onclick="postTowards('{{ stats_href }}');">Show quiz stats</a></li>
+              {% endif %}
+              <li><a href="{{ exam_href }}">Take an exam</a></li>
               <li><a href="{{ dict_href }}">List: {{ dict_name }}</a></li>
           {% endif %}
       </ul>

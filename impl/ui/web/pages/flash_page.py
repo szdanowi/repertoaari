@@ -42,3 +42,7 @@ class FlashPage(Page):
     def store_context(self, context):
         if context is not None:
             self.kwargs["context"] = str(context)
+
+    def with_stats_button(self, dict):
+        self.kwargs["stats_href"] = url_for('show_flash_stats', dict_file=dict)
+        return self
