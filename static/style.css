@@ -10,22 +10,24 @@ body {
   text-align: justify;
   font-family: 'Roboto', 'Open Sans', 'DejaVu Sans', sans-serif;
   font-weight: 300;
-}
-
-div#menu {
-  padding: 1em;
-  margin: 0em 0em 3em 0em;
-  background-color: #8ac7db;
-  color: white;
-  height: 1.5em;
-
   font-size: 1em;
   font-style: normal;
 }
 
+div#top-bar {
+  padding: 0em;
+  margin: 0;
+  background-color: #8ac7db;
+  color: white;
+  height: 3em;
+  width: 100%;
+  position: fixed;
+  top: 0;
+}
+
 p#app-name {
   float: left;
-  margin: 0em;
+  margin: 0.75em 1em;
   font-weight: 300;
   font-family: "Noto Serif", "Palatino Linotype", "Book Antiqua", Palatino, serif;
   text-transform: uppercase;
@@ -39,27 +41,68 @@ p#app-name strong {
   text-transform: lowercase;
 }
 
-div#menu ul {
+p#menu-hamburger {
+  font-size: 2em;
   float: right;
+  display: inline;
+  margin: 0;
+  padding: 0 0.5em;
+  vertical-align: middle;
+  cursor: pointer;
+  line-height: 1.5em;
+}
+
+p#menu-hamburger:hover {
+  background-color: #1e5162;
+}
+
+p#menu-hamburger.clicked {
+  background: #63b4cf;
+}
+
+p#menu-hamburger.clicked:hover {
+  background: #1e5162;
+}
+
+div#menu {
+  padding: 0em;
+  margin: 0;
+  background: #63b4cf;
+  position: fixed;
+  top: 3em;
+  right: 0;
+  visibility: hidden;
+  width: auto;
+}
+
+@media only screen and (max-device-width: 1080px) {
+  div#menu { width: 100%; }
+}
+
+div#menu ul {
   list-style-type: none;
   margin: 0;
   padding: 0;
 }
 
-div#menu li {
-  margin: 1em;
-  display: inline;
-  line-height: 1.5em;
-  vertical-align: bottom;
-}
-
 div#menu li a {
   color: white;
   text-decoration: none;
+  padding: 1em 2em;
+  display: block;
+  line-height: 1.5em;
+  vertical-align: bottom;
+  text-align: center;
+}
+
+div#menu li a:hover {
+  background-color: #1e5162;
 }
 
 div#content {
+  padding: 0.25em;
   margin: auto;
+  margin-top: 5em;
   margin-bottom: 2em;
   max-width: 64em;
 }

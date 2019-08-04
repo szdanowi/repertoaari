@@ -5,17 +5,36 @@
     <title>{% block title %}{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{{ stylesheet }}" type="text/css">
+    <link rel="stylesheet" href="../static/style.css" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500|Noto+Serif:400,700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="menu">
+    <script>
+        function toggleMenu() {
+            var menu_style = document.getElementById('menu').style;
+            var hamburger = document.getElementById('menu-hamburger');
+
+            if (menu_style.visibility == 'visible') {
+                menu_style.visibility = 'hidden';
+                hamburger.className = '';
+            } else {
+                menu_style.visibility = 'visible';
+                hamburger.className = 'clicked';
+            }
+        }
+    </script>
+    <div id="top-bar">
         <p id="app-name">Reperto<strong>aari</strong></p>
-        <ul>
-            {% if dict_name is defined %}
-                <li><a href="{{ exam_href }}">new exam</a></li>
-                <li><a href="{{ dict_href }}">{{ dict_name }}</a></li>
-            {% endif %}
-        </ul>
+        <p id="menu-hamburger" onclick="toggleMenu()">≡</p>
+    </div>
+    <div id="menu">
+      <ul>
+          {% if dict_name is defined %}
+              <li><a href="{{ flash_href }}">Flash cards</a></li>
+              <li><a href="{{ exam_href }}">New exam</a></li>
+              <li><a href="{{ dict_href }}">List: {{ dict_name }}</a></li>
+          {% endif %}
+      </ul>
     </div>
     <div id="content">
         {% block content %}{% endblock %}
