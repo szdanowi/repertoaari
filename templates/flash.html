@@ -4,16 +4,14 @@
     <h1>Flash card</h1>
 
     {% if result is defined %}
-    <div class="result_form">
-        <div class="result_entry">
-            <p class="result_entry_label">Correct answers:</p>
-            <p class="result_entry_value">{{ result.correct }}</p>
-            <p class="result_entry_value">{{ result.percent }}</p>
+    <div class="result-form">
+        <p class="label">Correct answers:</p>
+        <div class="value">
+            <div class="progress-bar">
+                <div class="progress-bar-done" style="width: {{ result.percentage }}%">{{ result.label }}</div>
+            </div>
         </div>
-        <div class="result_entry">
-            <p class="result_entry_label">Total answers:</p>
-            <p class="result_entry_value">{{ result.total }}</p>
-        </div>
+        <div class="button" onclick="postTowards('{{ stats_href }}');">Details</div>
     </div>
     {% endif %}
 

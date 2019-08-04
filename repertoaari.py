@@ -258,7 +258,8 @@ class Repertoaari:
         correct_answers = context.correct()
         questions_asked = context.total()
         percentage = 100.0 * correct_answers / float(questions_asked) if questions_asked > 0 else 0.0
-        ui.display_state(str(correct_answers), str(questions_asked), '{0:.2f}%'.format(percentage))
+
+        ui.display_state(correct_answers, questions_asked, percentage)
         ui.store_context(context)
 
     def show_dictionary(self, ui, dictionary_name):

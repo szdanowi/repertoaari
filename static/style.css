@@ -187,16 +187,19 @@ input.wrong {
   background: #ffb3b3;
 }
 
-input.button {
-  width: 98%;
+.button {
   border: 0px;
   background: #1e5162;
-  margin: 2em 0em;
-  padding: 0.5em;
+  padding: 0.5em 1em;
   box-sizing: border-box;
-
   color: white;
   font-size: 1em;
+  cursor: pointer;
+}
+
+input.button {
+  width: 98%;
+  margin: 2em 0em;
 }
 
 p.note, p.note-correct, p.note-wrong {
@@ -259,28 +262,34 @@ p.given_word_label {
   text-align: center;
 }
 
-div.result_form {
+div.row {
+  display: table-row;
+}
+
+div.result-form {
   margin: 0em 0em 2em;
-  width: 100%;
   display: table;
-  table-layout: fixed;
-  color: white;
+  padding: 0em;
+  width: 100%;
   background-color: #8ac7db;
   font-weight: 400;
 }
 
-div.result_entry {
-  display: table-row;
+div.result-form .label {
+  display: table-cell;
+  color: white;
+  white-space: nowrap;
+  padding: 1.5em;
 }
 
-p.result_entry_label {
+div.result-form .value {
   display: table-cell;
-  padding: 0.75em;
+  width: 100%;
+  padding: 1em 0em;
 }
 
-p.result_entry_value {
-  display: table-cell;
-  padding: 0.5em;
+div.result-form .button {
+  margin: 1em 1.5em 1em 1em;
 }
 
 div.centered-content {
