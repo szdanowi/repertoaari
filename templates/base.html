@@ -7,11 +7,12 @@
     <link rel="stylesheet" href="{{ stylesheet }}" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500|Noto+Serif:400,700&display=swap" rel="stylesheet">
 </head>
-<body onclick="hideMenuIfClickedOutside(event)">
+<body>
     <script>
         if (!("ontouchstart" in document.documentElement)) {
             document.documentElement.className += " not-touchscreen";
         }
+        document.onclick = hideMenuIfClickedOutside
 
         function hideMenuIfClickedOutside(event) {
             if (event.target.id != 'menu-hamburger') {
