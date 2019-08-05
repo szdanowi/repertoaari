@@ -339,10 +339,10 @@ class FromFileDictionary:
     def __load_from(self, filename):
         with open(filename, mode='rt', encoding='UTF-8') as f:
             lines = f.readlines()
-            self.left, self.right, name = self.__from_line(lines[0])
-
-            if name:
-                self.name = name
+            header = self.__from_line(lines[0])
+            self.left = header[0] if len(header) > 0 else ''
+            self.right = header[1] if len(header) > 1 else ''
+            self.name = header[2] if len(header) > 2 else self.name
 
             for line in lines[1:]:
                 key, matchers = self.__from_line(line, 2)
