@@ -10,9 +10,9 @@ class Page:
     def render(self):
         return render_template(self.template, **self.kwargs)
 
-    def display_dictionary_name(self, name):
+    def display_dictionary_name(self, id, name):
         self.kwargs["dict_name"] = name
-        self.kwargs["dict_href"] = url_for('show_dictionary_listing', dict_file=name)
-        self.kwargs["exam_href"] = url_for('show_exam', dict_file=name, words=12)
-        self.kwargs["flash_href"] = url_for('show_flash', dict_file=name)
+        self.kwargs["dict_href"] = url_for('show_dictionary_listing', dict_file=id)
+        self.kwargs["exam_href"] = url_for('show_exam', dict_file=id, words=12)
+        self.kwargs["flash_href"] = url_for('show_flash', dict_file=id)
         return self

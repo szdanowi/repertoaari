@@ -145,7 +145,7 @@ class Repertoaari:
         ui.tell_answer_was_wrong(translation.accepted())
         return 0.0
 
-    def show_exam(self, ui, dictionary_name, words):
+    def show_exam(self, ui, dict_id, words):
         if not isinstance(words, int):
             raise InvalidRequest("Number of requested words for quiz is not an integer")
 
@@ -155,8 +155,8 @@ class Repertoaari:
         if words > 256:
             raise InvalidRequest("We do not support more than 256 words in an exam (requested {0} words)".format(words))
 
-        dictionary = self.__dictionary.load(dictionary_name)
-        ui.display_dictionary_name(dictionary.name)
+        dictionary = self.__dictionary.load(dict_id)
+        ui.display_dictionary_name(dict_id, dictionary.name)
         ui.display_direction(dictionary.left, dictionary.right)
         for question_id in dictionary.pick_random_ids(words):
             question = dictionary[question_id]
@@ -170,7 +170,7 @@ class Repertoaari:
             self.side = side
             self.given = answer
 
-    def assess_exam(self, ui, dictionary_name, answers):
+    def assess_exam(self, ui, dict_id, answers):
         submitted_answers = len(answers)
 
         if submitted_answers < 1:
@@ -180,8 +180,8 @@ class Repertoaari:
             raise InvalidRequest("We do not support more than 256 words in an exam to assess (submitted {0} words)".format(submitted_answers))
 
         result = 0
-        dictionary = self.__dictionary.load(dictionary_name)
-        ui.display_dictionary_name(dictionary.name)
+        dictionary = self.__dictionary.load(dict_id)
+        ui.display_dictionary_name(dict_id, dictionary.name)
         ui.display_direction(dictionary.left, dictionary.right)
         for answer in answers:
             question = dictionary[int(answer.question_id)]
@@ -203,9 +203,9 @@ class Repertoaari:
         ui.display_summary(result, len(answers))
         return ui
 
-    def show_flash(self, ui, dictionary_name, context):
-        dictionary = self.__dictionary.load(dictionary_name)
-        ui.display_dictionary_name(dictionary.name)
+    def show_flash(self, ui, dict_id, context):
+        dictionary = self.__dictionary.load(dict_id)
+        ui.display_dictionary_name(dict_id, dictionary.name)
 
         question_id = self.pick_question(dictionary, context)
         question = dictionary[question_id]
@@ -225,9 +225,9 @@ class Repertoaari:
         max_chance = 1.0
         return min_chance + ((1.0 - context.ratio_of(id)) * (max_chance - min_chance))
 
-    def assess_flash(self, ui, dictionary_name, question_id, answer, context):
-        dictionary = self.__dictionary.load(dictionary_name)
-        ui.display_dictionary_name(dictionary.name)
+    def assess_flash(self, ui, dict_id, question_id, answer, context):
+        dictionary = self.__dictionary.load(dict_id)
+        ui.display_dictionary_name(dict_id, dictionary.name)
 
         question = dictionary[int(question_id)]
         matched = question.any_matches(answer)
@@ -238,9 +238,9 @@ class Repertoaari:
 
         return ui
 
-    def show_flash_stats(self, ui, dictionary_name, context):
-        dictionary = self.__dictionary.load(dictionary_name)
-        ui.display_dictionary_name(dictionary.name)
+    def show_flash_stats(self, ui, dict_id, context):
+        dictionary = self.__dictionary.load(dict_id)
+        ui.display_dictionary_name(dict_id, dictionary.name)
         ui.display_direction(dictionary.left, dictionary.right)
 
         for id in dictionary.ids():
@@ -262,10 +262,10 @@ class Repertoaari:
         ui.display_state(correct_answers, questions_asked, percentage)
         ui.store_context(context)
 
-    def show_dictionary(self, ui, dictionary_name):
-        dictionary = self.__dictionary.load(dictionary_name)
+    def show_dictionary(self, ui, dict_id):
+        dictionary = self.__dictionary.load(dict_id)
 
-        ui.display_dictionary_name(dictionary.name)
+        ui.display_dictionary_name(dict_id, dictionary.name)
         ui.display_direction(dictionary.left, dictionary.right)
 
         for entry in dictionary:
@@ -339,20 +339,23 @@ class FromFileDictionary:
     def __load_from(self, filename):
         with open(filename, mode='rt', encoding='UTF-8') as f:
             lines = f.readlines()
-            self.left, self.right = self.__from_line(lines[0])
+            self.left, self.right, name = self.__from_line(lines[0])
+
+            if name:
+                self.name = name
 
             for line in lines[1:]:
-                key, matchers = self.__from_line(line)
+                key, matchers = self.__from_line(line, 2)
                 self.__add(key, matchers)
 
     @staticmethod
-    def __from_line(line):
+    def __from_line(line, expected=None):
         elements = [e.strip() for e in re.sub('#.*$', '', line).split(';')]
 
-        if len(elements) != 2:
-            return None, None
+        if expected and len(elements) != expected:
+            return [None] * expected
 
-        return elements[0], elements[1]
+        return elements
 
     def __add(self, key, matchers):
         if not key or not matchers:
