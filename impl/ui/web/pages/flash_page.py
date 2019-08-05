@@ -8,7 +8,7 @@ class FlashPage(Page):
         def __init__(self, correct, total, percent):
             self.correct = correct
             self.total = total
-            self.percentage = percent
+            self.percentage = percent if total > 0 else 100.0
             self.label = '{0}/{1}'.format(correct, total)
 
     class Answer:
