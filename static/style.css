@@ -104,15 +104,14 @@ div#menu li a {
 div#content {
   padding: 0;
   margin: auto;
-  margin-top: 5em;
+  margin-top: 3em;
   margin-bottom: 2em;
   max-width: 64em;
 }
 
 h1 {
   margin: 0em;
-  padding: 0em 1em 1em;
-  border-left: solid 1px;
+  padding: 1.5em 0.5em 1em;
   font-size: 1.5em;
   font-weight: 100;
 }
@@ -238,8 +237,8 @@ p.result {
 
 div.flash_card {
   display: table;
-  width: 100%;
-  margin: 0.2em 0em 0em;
+  width: 98%;
+  margin: 0.2em auto 0em;
 }
 
 div.flash_pair {
@@ -312,4 +311,8 @@ div.progress-bar {
 div.progress-bar-done {
   background-color: #b3ffb3;
   padding: 0.5em 0;
+}
+
+@media only screen and (max-device-width: 1080px) {
+  .no-mobile { display: none; }
 }

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Exam for: {{ dict_name }}{% endblock %}
 {% block content %}
-    <h1>Exam</h1>
+    <h1 class="no-mobile">Exam</h1>
 
     {% if points_awarded is defined %}
         <p class="result">Your result is: {{ grade }} ({{ points_awarded }} of {{ max_points }} correct)</p>
